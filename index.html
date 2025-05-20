@@ -69,79 +69,115 @@
     <thead>
       <tr>
         <th>日期
-		<input type="date" id="datePicker"></th>
+          <input type="date" id="datePicker" max="">
+        </th>
         <th>時間</th>
         <th>警示狀態
-		<select id="statusSelect">
-			<option>輕微危險</option>
-			<option>中等危險</option>
-			<option>緊急</option>
-		</select></th>
+          <select id="statusSelect">
+            <option value="">全部</option>
+            <option value="輕微危險">輕微危險</option>
+            <option value="中等危險">中等危險</option>
+            <option value="緊急">緊急</option>
+          </select>
+        </th>
         <th>Video</th>
         <th>Note</th>
       </tr>
     </thead>
-    <tbody id="tableBody">
-      <!-- 資料列將由 JavaScript 動態產生 -->
-    </tbody>
+    <tbody id="tableBody"></tbody>
   </table>
 
   <div class="pagination">
     <button onclick="changePage(-1)">Previous</button>
-    <input class="page-input" type="text" id="pageInput" onchange="goToPage()">
-    <span id="pageInfo"></span>
+    <input class="page-input" type="text" id="pageInput" onchange="goToPage()"> / <span id="totalPages"></span>
     <button onclick="changePage(1)">Next</button>
   </div>
 </div>
 
 <script>
+  // 設定 datePicker 最大可選日期為今天
+  const todayStr = new Date().toISOString().split('T')[0];
+  document.getElementById("datePicker").setAttribute("max", todayStr);
+
+  // 假資料
   const data = [];
-  for (let i = 0; i < 50; i++) {
-    const date = `2025-05-${String(20 + Math.floor(i / 10)).padStart(2, '0')}`;
-    const time = `${10 + i % 10}:23`;
-    const status = ['輕微危險', '中等危險', '緊急'][i % 3];
-    data.push({ date, time, status });
-  }
+	for (let i = 0; i < 50; i++) {
+	  // 改為 2025-05-15 到 2025-05-19（共 5 天，每天 10 筆）
+	  const day = 15 + Math.floor(i / 10);  // 15, 16, 17, 18, 19
+	  const date = `2025-05-${String(day).padStart(2, '0')}`;
+	  const time = `${10 + i % 10}:23`;
+	  const status = ['輕微危險', '中等危險', '緊急'][i % 3];
+	  data.push({ date, time, status, note: "" });
+	}
+  data.sort((a, b) => new Date(b.date) - new Date(a.date));
 
   const rowsPerPage = 5;
   let currentPage = 1;
+  let filteredData = [...data];
 
   function renderTable() {
     const tableBody = document.getElementById("tableBody");
     tableBody.innerHTML = "";
     const start = (currentPage - 1) * rowsPerPage;
-    const end = Math.min(start + rowsPerPage, data.length);
+    const end = start + rowsPerPage;
+    const pageData = filteredData.slice(start, end);
 
-    for (let i = start; i < end; i++) {
+    for (let i = 0; i < pageData.length; i++) {
+      const realIndex = data.indexOf(pageData[i]); // 找出原始資料位置
       const row = document.createElement("tr");
       row.innerHTML = `
-        <td>${data[i].date}</td>
-        <td>${data[i].time}</td>
-        <td>${data[i].status}</td>
+        <td>${pageData[i].date}</td>
+        <td>${pageData[i].time}</td>
+        <td>${pageData[i].status}</td>
         <td><span class="video-icon">▶️</span></td>
-        <td><textarea placeholder="請輸入備註..."></textarea></td>
+        <td><textarea data-index="${realIndex}" oninput="updateNote(event)">${data[realIndex].note}</textarea></td>
       `;
       tableBody.appendChild(row);
     }
 
-    document.getElementById("pageInfo").textContent = `${currentPage} / ${Math.ceil(data.length / rowsPerPage)}`;
+    const maxPage = Math.ceil(filteredData.length / rowsPerPage);
     document.getElementById("pageInput").value = currentPage;
+    document.getElementById("totalPages").textContent = maxPage;
+  }
+
+  function updateNote(event) {
+    const index = parseInt(event.target.dataset.index);
+    if (!isNaN(index)) {
+      data[index].note = event.target.value;
+    }
   }
 
   function changePage(delta) {
-    const maxPage = Math.ceil(data.length / rowsPerPage);
+    const maxPage = Math.ceil(filteredData.length / rowsPerPage);
     currentPage = Math.min(Math.max(1, currentPage + delta), maxPage);
     renderTable();
   }
 
   function goToPage() {
     const pageInput = parseInt(document.getElementById("pageInput").value);
-    const maxPage = Math.ceil(data.length / rowsPerPage);
+    const maxPage = Math.ceil(filteredData.length / rowsPerPage);
     if (!isNaN(pageInput)) {
       currentPage = Math.min(Math.max(1, pageInput), maxPage);
       renderTable();
     }
   }
+
+  function filterData() {
+    const selectedDate = document.getElementById("datePicker").value;
+    const selectedStatus = document.getElementById("statusSelect").value;
+
+    filteredData = data.filter(entry => {
+      const matchDate = selectedDate ? entry.date === selectedDate : true;
+      const matchStatus = selectedStatus ? entry.status === selectedStatus : true;
+      return matchDate && matchStatus;
+    });
+
+    currentPage = 1;
+    renderTable();
+  }
+
+  document.getElementById("datePicker").addEventListener("change", filterData);
+  document.getElementById("statusSelect").addEventListener("change", filterData);
 
   renderTable();
 </script>
