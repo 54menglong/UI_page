@@ -65,27 +65,18 @@
 <div class="container">
   <h2>離床偵測警示畫面</h2>
 
-  <div class="filter-row">
-    <div>
-      <label for="datePicker">日期：</label>
-      <input type="date" id="datePicker">
-    </div>
-    <div>
-      <label for="statusSelect">警示狀態：</label>
-      <select id="statusSelect">
-        <option>輕微危險</option>
-        <option>中等危險</option>
-        <option>緊急</option>
-      </select>
-    </div>
-  </div>
-
   <table>
     <thead>
       <tr>
-        <th>日期</th>
+        <th>日期
+		<input type="date" id="datePicker"></th>
         <th>時間</th>
-        <th>警示狀態</th>
+        <th>警示狀態
+		<select id="statusSelect">
+			<option>輕微危險</option>
+			<option>中等危險</option>
+			<option>緊急</option>
+		</select></th>
         <th>Video</th>
         <th>Note</th>
       </tr>
