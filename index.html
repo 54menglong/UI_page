@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>離床偵測警示畫面</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      border: 2px solid #004080;
+      padding: 10px;
+    }
+    h2 {
+      text-align: center;
+      margin-top: 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      border: 1px solid #004080;
+      padding: 8px;
+      text-align: center;
+    }
+    select, input, textarea {
+      padding: 4px;
+      font-size: 14px;
+    }
+    .pagination {
+      text-align: center;
+      margin-top: 10px;
+    }
+    .page-input {
+      width: 40px;
+      text-align: center;
+    }
+    .video-icon {
+      font-size: 20px;
+      color: red;
+      cursor: pointer;
+    }
+    textarea {
+      width: 90%;
+      height: 40px;
+      resize: none;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h2>離床偵測警示畫面</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>
+          日期<br>
+          <select id="dateSelect"></select>
+        </th>
+        <th>時間</th>
+        <th>
+          警示狀態<br>
+          <select>
+            <option>輕微危險</option>
+            <option>中等危險</option>
+            <option>緊急</option>
+          </select>
+        </th>
+        <th>Video</th>
+        <th>Note</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>2025-05-20</td>
+        <td>14:23</td>
+        <td>緊急</td>
+        <td><span class="video-icon">▶️</span></td>
+        <td><textarea placeholder="請輸入備註..."></textarea></td>
+      </tr>
+      <tr><td colspan="5">&nbsp;</td></tr>
+      <tr><td colspan="5">&nbsp;</td></tr>
+      <tr><td colspan="5">&nbsp;</td></tr>
+    </tbody>
+  </table>
+
+  <div class="pagination">
+    <button>Previous</button>
+    <span>1.2</span>
+    <input class="page-input" type="text" value="3">
+    <span>4.5</span>
+    <button>Next</button>
+  </div>
+</div>
+
+<script>
+  // 自動填入日期從 2020-01-01 到今天
+  const dateSelect = document.getElementById("dateSelect");
+  const startDate = new Date("2020-01-01");
+  const endDate = new Date();
+  while (startDate <= endDate) {
+    const yyyy = startDate.getFullYear();
+    const mm = String(startDate.getMonth() + 1).padStart(2, '0');
+    const dd = String(startDate.getDate()).padStart(2, '0');
+    const option = document.createElement("option");
+    option.value = `${yyyy}-${mm}-${dd}`;
+    option.textContent = `${yyyy}-${mm}-${dd}`;
+    dateSelect.appendChild(option);
+    startDate.setDate(startDate.getDate() + 1);
+  }
+</script>
+
+</body>
+</html>
