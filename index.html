@@ -49,6 +49,15 @@
       height: 40px;
       resize: none;
     }
+    .filter-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .filter-row label {
+      margin-right: 5px;
+    }
   </style>
 </head>
 <body>
@@ -56,64 +65,94 @@
 <div class="container">
   <h2>離床偵測警示畫面</h2>
 
+  <div class="filter-row">
+    <div>
+      <label for="datePicker">日期：</label>
+      <input type="date" id="datePicker">
+    </div>
+    <div>
+      <label for="statusSelect">警示狀態：</label>
+      <select id="statusSelect">
+        <option>輕微危險</option>
+        <option>中等危險</option>
+        <option>緊急</option>
+      </select>
+    </div>
+  </div>
+
   <table>
     <thead>
       <tr>
-        <th>
-          日期<br>
-          <select id="dateSelect"></select>
-        </th>
+        <th>日期</th>
         <th>時間</th>
-        <th>
-          警示狀態<br>
-          <select>
-            <option>輕微危險</option>
-            <option>中等危險</option>
-            <option>緊急</option>
-          </select>
-        </th>
+        <th>警示狀態</th>
         <th>Video</th>
         <th>Note</th>
       </tr>
     </thead>
-    <tbody>
-      <tr>
-        <td>2025-05-20</td>
-        <td>14:23</td>
-        <td>緊急</td>
-        <td><span class="video-icon">▶️</span></td>
-        <td><textarea placeholder="請輸入備註..."></textarea></td>
-      </tr>
-      <tr><td colspan="5">&nbsp;</td></tr>
-      <tr><td colspan="5">&nbsp;</td></tr>
-      <tr><td colspan="5">&nbsp;</td></tr>
+    <tbody id="tableBody">
+      <!-- 資料列將由 JavaScript 動態產生 -->
     </tbody>
   </table>
 
   <div class="pagination">
-    <button>Previous</button>
-    <span>1.2</span>
-    <input class="page-input" type="text" value="3">
-    <span>4.5</span>
-    <button>Next</button>
+    <button onclick="changePage(-1)">Previous</button>
+    <span id="pageInfo"></span>
+    <input class="page-input" type="text" id="pageInput" onchange="goToPage()">
+    <button onclick="changePage(1)">Next</button>
   </div>
 </div>
 
 <script>
-  // 自動填入日期從 2020-01-01 到今天
-  const dateSelect = document.getElementById("dateSelect");
-  const startDate = new Date("2020-01-01");
-  const endDate = new Date();
-  while (startDate <= endDate) {
-    const yyyy = startDate.getFullYear();
-    const mm = String(startDate.getMonth() + 1).padStart(2, '0');
-    const dd = String(startDate.getDate()).padStart(2, '0');
-    const option = document.createElement("option");
-    option.value = `${yyyy}-${mm}-${dd}`;
-    option.textContent = `${yyyy}-${mm}-${dd}`;
-    dateSelect.appendChild(option);
-    startDate.setDate(startDate.getDate() + 1);
+  const data = [];
+  for (let i = 0; i < 50; i++) {
+    const date = `2025-05-${String(20 + Math.floor(i / 10)).padStart(2, '0')}`;
+    const time = `${10 + i % 10}:23`;
+    const status = ['輕微危險', '中等危險', '緊急'][i % 3];
+    data.push({ date, time, status });
   }
+
+  const rowsPerPage = 5;
+  let currentPage = 1;
+
+  function renderTable() {
+    const tableBody = document.getElementById("tableBody");
+    tableBody.innerHTML = "";
+    const start = (currentPage - 1) * rowsPerPage;
+    const end = Math.min(start + rowsPerPage, data.length);
+
+    for (let i = start; i < end; i++) {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${data[i].date}</td>
+        <td>${data[i].time}</td>
+        <td>${data[i].status}</td>
+        <td><span class="video-icon">▶️</span></td>
+        <td><textarea placeholder="請輸入備註..."></textarea></td>
+      `;
+      tableBody.appendChild(row);
+    }
+
+    document.getElementById("pageInfo").textContent = `${currentPage} / ${Math.ceil(data.length / rowsPerPage)}`;
+    document.getElementById("pageInput").value = currentPage;
+  }
+
+  function changePage(delta) {
+    const maxPage = Math.ceil(data.length / rowsPerPage);
+    currentPage = Math.min(Math.max(1, currentPage + delta), maxPage);
+    renderTable();
+  }
+
+  function goToPage() {
+    const pageInput = parseInt(document.getElementById("pageInput").value);
+    const maxPage = Math.ceil(data.length / rowsPerPage);
+    if (!isNaN(pageInput)) {
+      currentPage = Math.min(Math.max(1, pageInput), maxPage);
+      renderTable();
+    }
+  }
+
+  renderTable();
 </script>
 
 </body>
